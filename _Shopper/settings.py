@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'shop.apps.ShopConfig',
+    'realtor.apps.RealtorConfig',
     'pages.apps.PagesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -76,8 +78,12 @@ WSGI_APPLICATION = '_Shopper.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME':'mydb',
+        'USER':'postgres',
+        'PASSWORD':'a1b2c3z4',
+        'HOST':'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -123,3 +129,6 @@ STATIC_ROOT = os.path.join(BASE_DIR,"static1")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "_Shopper/static"),
 ]
+#media
+MEDIA_ROOT = os.path.join(BASE_DIR,"media")
+MEDIA_URL = '/media/'
