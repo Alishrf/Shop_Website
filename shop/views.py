@@ -1,3 +1,10 @@
 from django.shortcuts import render
+from .models import Product
 
-# Create your views here.
+def shop(request):
+    products = Product.objects.order_by('-release_time')
+    context = {
+        'products' : products
+    }
+    return render(request,'shop/shop.html' ,context)
+

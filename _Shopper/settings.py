@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'categories.apps.CategoriesConfig',
     'shop.apps.ShopConfig',
     'realtor.apps.RealtorConfig',
     'pages.apps.PagesConfig',
@@ -129,6 +130,7 @@ STATIC_ROOT = os.path.join(BASE_DIR,"static1")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "_Shopper/static"),
 ]
+
 #media
 MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 MEDIA_URL = '/media/'

@@ -19,7 +19,7 @@
           {% if 'shop' in request.path %}:
               class="active"
           {% endif %}
-        ><a href="shop.html">Shop</a></li>
+        ><a href="{% url 'shop' %}">Shop</a></li>
         <li
           {% if 'register' in request.path %}:
             class="active"

@@ -1,9 +1,12 @@
 from django.db import models
 from datetime import datetime
 from realtor.models import Realtor
+from categories.models import Categories
+
 
 class Product(models.Model):
     realtor = models.ForeignKey(Realtor,on_delete=models.CASCADE)
+    categorie = models.ForeignKey(Categories , on_delete = models.CASCADE,blank = True)
     title = models.CharField(max_length = 30)
     quantity_small = models.IntegerField(default=0)
     quantity_medium = models.IntegerField(default=0)
@@ -17,6 +20,8 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+
 
 
 
