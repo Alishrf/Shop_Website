@@ -5,7 +5,7 @@
 <div class="bg-light py-3">
         <div class="container">
           <div class="row">
-            <div class="col-md-12 mb-0"><a href="index.html">Home</a> <span class="mx-2 mb-0">/</span> <strong class="text-black">Shop</strong></div>
+            <div class="col-md-12 mb-0"><a href="{% url 'index' %}">Home</a> <span class="mx-2 mb-0">/</span> <strong class="text-black">Shop</strong></div>
           </div>
         </div>
       </div>
@@ -22,24 +22,58 @@
                   <div class="d-flex">
                     <div class="dropdown mr-1 ml-md-auto">
                       <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Latest
+                        {% if  'women' in request.path %}
+                          Women
+                        {% elif 'men' in request.path %}
+                          Men
+                        {% elif  'children' in request.path %}
+                          Children
+                        {% else %}
+                          Latest
+                        {% endif %}
                       </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-                        <a class="dropdown-item" href="#">Men</a>
-                        <a class="dropdown-item" href="#">Women</a>
-                        <a class="dropdown-item" href="#">Children</a>
+                        <a class="dropdown-item" href="{% url 'men' %}">Men</a>
+                        <a class="dropdown-item" href="{% url 'women' %}">Women</a>
+                        <a class="dropdown-item" href="{% url 'children' %}">Children</a>
                       </div>
                     </div>
                     <div class="btn-group">
-                      <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" id="dropdownMenuReference" data-toggle="dropdown">Reference</button>
+                      <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" id="dropdownMenuReference" data-toggle="dropdown">
+                          {% if  'A to Z' in values.refrences %}
+                            Name, A to Z
+                          {% elif 'Z to A' in values.refrences %}
+                            Name, Z to A
+                          {% elif  'high to low' in values.refrences %}
+                            Price, high to low  
+                          {% elif  'low to high' in values.refrences %}
+                            Price, low to high
+                          {% else %}
+                            Reference
+                          {% endif %}
+                      </button>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenuReference">
-                        <a class="dropdown-item" href="#">Relevance</a>
-                        <a class="dropdown-item" href="#">Name, A to Z</a>
-                        <a class="dropdown-item" href="#">Name, Z to A</a>
+
+                          <form action="{% url 'shop' %}" >
+                            <input type="hidden" name="refrences" value="A to Z">
+                            <input type="submit"   class="dropdown-item" value="Name, A to Z">
+                          </form>
+                          <form action="{% url 'shop' %}" >
+                            <input type="hidden" name="refrences" value="Z to A">
+                            <input type="submit"   class="dropdown-item" value="Name, Z to A">
+                          </form>
+
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Price, low to high</a>
-                        <a class="dropdown-item" href="#">Price, high to low</a>
+                        <form action="{% url 'shop' %}" >
+                          <input type="hidden" name="refrences" value="low to high">
+                          <input type="submit"   class="dropdown-item" value="Price, low to high">
+                        </form>
+                        <form action="{% url 'shop' %}" >
+                          <input type="hidden" name="refrences" value="high to low">
+                          <input type="submit"   class="dropdown-item" value="Price, high to low">
+                        </form>
                       </div>
+
                     </div>
                   </div>
                 </div>
@@ -47,10 +81,10 @@
               <div class="row mb-5">
                 {% if products %}
                     {% for product in products %}
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                      <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                         <div class="block-4 text-center border">
                             <figure class="block-4-image">
-                            <a href="shop-single.html"><img src="{{ product.main_image.url }}" alt="Image placeholder" class="img-fluid"></a>
+                            <a href="{% url 'shop' %}products/{{ product.id }}"><img src="{{ product.main_image.url }}" alt="Image placeholder" class="img-fluid"></a>
                             </figure>
                             <div class="block-4-text p-4">
                             <h3><a href="shop-single.html">{{ product.title }}</a></h3>
@@ -58,10 +92,9 @@
                             <p class="text-primary font-weight-bold">{{ product.title }}</p>
                             </div>
                         </div>
-                        </div>
+                        </div>  
                     {% endfor %}
                 {% else %}
-                        
                     <div class="col-md-7 site-section-heading text-center pt-4">
                         <h2>There Is No Product Available  </h2>
                     </div>
@@ -72,15 +105,27 @@
               <div class="row" data-aos="fade-up">
                 <div class="col-md-12 text-center">
                   <div class="site-block-27">
-                    <ul>
-                      <li><a href="#">&lt;</a></li>
-                      <li class="active"><span>1</span></li>
-                      <li><a href="#">2</a></li>
-                      <li><a href="#">3</a></li>
-                      <li><a href="#">4</a></li>
-                      <li><a href="#">5</a></li>
-                      <li><a href="#">&gt;</a></li>
-                    </ul>
+                    {% if products.has_other_pages %}
+                      <ul>
+                        {% if products.has_previous %}
+                          <li><a href="?page={{ products.previous_page_number }}{% if values.refrences %}&refrences={{values.refrences}}{% endif %}">&lt;</a></li>
+                        {% else %}
+                          <li><a >&lt;</a></li>
+                        {% endif %}
+                        {% for i in products.paginator.page_range %}
+                            {% if i == products.number %}
+                              <li class="active"><span>{{ i }}</span></li>
+                            {% else %}  
+                              <li><a href="?page={{ i }}{% if values.refrences %}&refrences={{values.refrences}}{% endif %}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if products.has_next %}
+                          <li><a href="?page={{ products.next_page_number }}{% if values.refrences %}&refrences={{values.refrences}}{% endif %}">&gt;</a></li>
+                        {% else %}
+                          <li><a>&gt;</a></li>
+                        {% endif %}  
+                      </ul>
+                    {% endif %}
                   </div>
                 </div>
               </div>
@@ -90,9 +135,9 @@
               <div class="border p-4 rounded mb-4">
                 <h3 class="mb-3 h6 text-uppercase text-black d-block">Categories</h3>
                 <ul class="list-unstyled mb-0">
-                  <li class="mb-1"><a href="#" class="d-flex"><span>Men</span> <span class="text-black ml-auto">(2,220)</span></a></li>
-                  <li class="mb-1"><a href="#" class="d-flex"><span>Women</span> <span class="text-black ml-auto">(2,550)</span></a></li>
-                  <li class="mb-1"><a href="#" class="d-flex"><span>Children</span> <span class="text-black ml-auto">(2,124)</span></a></li>
+                  <li class="mb-1"><a href="{% url 'men' %}" class="d-flex"><span>Men</span> <span class="text-black ml-auto">({{menSize}})</span></a></li>
+                  <li class="mb-1"><a href="{% url 'women' %}" class="d-flex"><span>Women</span> <span class="text-black ml-auto">({{womenSize}})</span></a></li>
+                  <li class="mb-1"><a href="{% url 'children' %}" class="d-flex"><span>Children</span> <span class="text-black ml-auto">({{childrenSize}})</span></a></li>
                 </ul>
               </div>
   
@@ -146,7 +191,7 @@
                   </div>
                   <div class="row">
                     <div class="col-sm-6 col-md-6 col-lg-4 mb-4 mb-lg-0" data-aos="fade" data-aos-delay="">
-                      <a class="block-2-item" href="#">
+                      <a class="block-2-item" href="{% url 'women' %}">
                         <figure class="image">
                           <img src="{% static 'images/women.jpg' %}" alt="" class="img-fluid">
                         </figure>
@@ -157,7 +202,7 @@
                       </a>
                     </div>
                     <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade" data-aos-delay="100">
-                      <a class="block-2-item" href="#">
+                      <a class="block-2-item" href="{% url 'children' %}">
                         <figure class="image">
                           <img src="{% static 'images/children.jpg' %}" alt="" class="img-fluid">
                         </figure>
@@ -168,7 +213,7 @@
                       </a>
                     </div>
                     <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade" data-aos-delay="200">
-                      <a class="block-2-item" href="#">
+                      <a class="block-2-item" href="{% url 'men' %}">
                         <figure class="image">
                           <img src="{% static 'images/men.jpg' %}" alt="" class="img-fluid">
                         </figure>
