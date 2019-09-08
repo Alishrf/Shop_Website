@@ -24,7 +24,7 @@
           {% if 'register' in request.path %}:
             class="active"
           {% endif %}
-        ><a href="contact.html">Register</a></li>
+        ><a href="{% url 'register' %}">Register</a></li>
       </ul>
     </div>
   </nav>
