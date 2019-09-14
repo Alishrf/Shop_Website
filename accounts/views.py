@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages,auth
 from django.contrib.auth.models import User
+from carts.models import Cart
 
 
 
@@ -17,8 +18,9 @@ def register(request):
                 messages.error(request,'This Email Already Use')   
                 return  redirect(register)
             else:
+                cart = Cart()
                 user = User.objects.create_user(first_name = name , last_name = family_name ,
-                 email = email , password = password1,username = email)
+                 email = email , password = password1,username = email , cart = cart)
                 messages.success(request , 'You Are Registered Successfully')
                 return redirect(login)
         else :
