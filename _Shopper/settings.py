@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'coupon.apps.CouponConfig',
     'orders.apps.OrdersConfig',
     'pages.apps.PagesConfig',
+    'customers.apps.CustomersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

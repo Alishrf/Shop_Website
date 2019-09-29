@@ -2,6 +2,12 @@ from django.shortcuts import render,redirect
 from django.contrib import messages,auth
 from django.contrib.auth.models import User
 from carts.models import Cart
+from customers.models import Customer
+from coupon.models import Coupon
+from orders.models import Order
+from shop.models import Product
+from datetime import datetime
+
 
 
 
@@ -18,9 +24,16 @@ def register(request):
                 messages.error(request,'This Email Already Use')   
                 return  redirect(register)
             else:
-                cart = Cart()
+                coupon = Coupon()
+                coupon.save()
+                cart = Cart(coupon = coupon , total = 0 , subtotal= 0)
+                cart.save()
+
                 user = User.objects.create_user(first_name = name , last_name = family_name ,
-                 email = email , password = password1,username = email , cart = cart)
+                 email = email , password = password1,username = email )
+
+                customer = Customer(user = user , cart = cart)
+                customer.save()
                 messages.success(request , 'You Are Registered Successfully')
                 return redirect(login)
         else :
@@ -36,10 +49,80 @@ def login(request):
         if user is not None:
             auth.login(request,user)
             messages.success(request,'You Are Loged In Successfully')
-            return redirect(login)
+            return redirect(dashboard)
         else:
             messages.error(request,'Email Or Passsword Is Not Availabe')
             return redirect(login)
 
 
     return render(request , 'accounts/login.html')
+
+def dashboard(request):
+    customer = Customer.objects.get(user= request.user)
+    context = {
+        'customer' : customer ,
+    }
+    return render(request , 'accounts/dashboard.html',context)
+
+def addToCart(request):
+    customer = Customer.objects.get(user= request.user)
+    if request.method == 'POST':
+        quantity = request.POST['quantity']
+        size = request.POST['shop-sizes']
+        product = Product.objects.get(pk = request.POST['product_id'])
+        total_price = int(quantity) * float(product.price)
+        order = Order(quantity = quantity , size = size  , product = product , total_price = total_price)
+        order.save()
+        customer.cart.orders.add(order)
+        cart = customer.cart
+        cart.subtotal = cart.subtotal + total_price
+        cart.total = float(cart.subtotal) * int(100 - cart.coupon.off)/(100) 
+        cart.save()
+        
+
+    return redirect('dashboard')
+
+def removeCart(request):
+    customer = Customer.objects.get(user= request.user)
+    if request.method == 'POST':
+        order = Order.objects.get(pk = request.POST['order_id'])
+        cart = customer.cart
+        cart.subtotal = cart.subtotal - order.total_price
+        cart.total = float(cart.subtotal) * int(100 - cart.coupon.off)/(100) 
+        cart.save() 
+        customer.cart.orders.remove(order)
+        order.delete() 
+        messages.success(request , 'Order Removed Successfully')
+
+    return redirect('dashboard')
+
+
+def addCoupon(request):
+    if request.method == 'POST':
+        customer = Customer.objects.get(user= request.user)
+        cart = customer.cart
+        coupon = Coupon.objects.get(code = request.POST['coupon_id'])
+        if coupon is not None:
+            present = datetime.date(datetime.now())
+            d = datetime.date(coupon.expiration_date) 
+            if  present <=  d:
+                cart.coupon = coupon
+                cart.coupon.save()
+                cart.total = float(cart.subtotal) * int(100 - cart.coupon.off)/(100) 
+                cart.save()
+                messages.success(request , 'Coupon Id Accepted Successfully')
+            else:    
+                messages.error(request ,'Your Coupon IS Expired')    
+
+        else:
+            messages.error(request ,'Your Coupon Code Is Not Valid')    
+
+    return redirect('dashboard')    
+
+
+def logout(request):
+    if request.user.is_authenticated:
+        auth.logout(request)
+        messages.success(request,'You Are Now Logged Out')
+
+    return redirect('login')    

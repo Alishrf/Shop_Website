@@ -5,8 +5,8 @@ from categories.models import Categories
 
 
 class Product(models.Model):
-    realtor = models.ForeignKey(Realtor,on_delete=models.CASCADE)
-    categorie = models.ForeignKey(Categories , on_delete = models.CASCADE,blank = True)
+    realtor = models.ForeignKey(Realtor,on_delete=models.DO_NOTHING)
+    categorie = models.ForeignKey(Categories , on_delete = models.DO_NOTHING,blank = True)
     title = models.CharField(max_length = 30)
     quantity_small = models.IntegerField(default=0)
     quantity_medium = models.IntegerField(default=0)
@@ -19,7 +19,7 @@ class Product(models.Model):
     main_image = models.ImageField(upload_to = 'photos/%Y/%m/%d')
 
     def __str__(self):
-        return self.title
+        return self.title()
 
 
 
