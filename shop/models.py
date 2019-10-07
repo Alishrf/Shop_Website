@@ -19,7 +19,7 @@ class Product(models.Model):
     main_image = models.ImageField(upload_to = 'photos/%Y/%m/%d')
 
     def __str__(self):
-        return self.title()
+        return self.title
 
 
 

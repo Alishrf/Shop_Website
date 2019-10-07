@@ -58,15 +58,16 @@ def login(request):
     return render(request , 'accounts/login.html')
 
 def dashboard(request):
-    customer = Customer.objects.get(user= request.user)
-    context = {
-        'customer' : customer ,
-    }
-    return render(request , 'accounts/dashboard.html',context)
+    if User.is_authenticated:
+        customer = Customer.objects.get(user= request.user)
+        context = {
+            'customer' : customer ,
+        }
+        return render(request , 'accounts/dashboard.html',context)
 
 def addToCart(request):
-    customer = Customer.objects.get(user= request.user)
     if request.method == 'POST':
+        customer = Customer.objects.get(user= request.user)
         quantity = request.POST['quantity']
         size = request.POST['shop-sizes']
         product = Product.objects.get(pk = request.POST['product_id'])
@@ -83,8 +84,8 @@ def addToCart(request):
     return redirect('dashboard')
 
 def removeCart(request):
-    customer = Customer.objects.get(user= request.user)
     if request.method == 'POST':
+        customer = Customer.objects.get(user= request.user)
         order = Order.objects.get(pk = request.POST['order_id'])
         cart = customer.cart
         cart.subtotal = cart.subtotal - order.total_price
