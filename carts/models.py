@@ -6,6 +6,7 @@ class Cart(models.Model):
     orders = models.ManyToManyField(Order,blank = True)
     subtotal = models.FloatField(blank = True)
     total = models.FloatField(blank = True)
-    coupon = models.ForeignKey(Coupon,on_delete = models.DO_NOTHING,blank = True)
-
+    coupon = models.ForeignKey(Coupon,on_delete = models.DO_NOTHING , blank = True)
+    def __str__(self):
+        return 'Cart Num = ' + str(self.id)  
 

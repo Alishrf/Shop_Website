@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from .models import SubmittedOrder
 from carts.models import Cart 
 from django.contrib import messages
+from coupon.models import Coupon
 
 
 def checkout(request):
@@ -13,6 +14,7 @@ def checkout(request):
         context = {
             'customer' : customer ,
             'countries' : countries ,
+            'cart_size' : len(customer.cart.orders.all())
         }
         return render(request , 'checkout/checkout.html',context)
 
@@ -64,15 +66,23 @@ def addSubmittedOrder(request):
         posta = int(request.POST['c_postal_zip'])
         email = request.POST['c_email_address']
         phone = request.POST['c_phone']
-        order_notes = request.POST['c_order_notes']
-        submittedOrder = SubmittedOrder( country = country , first_name = first_name ,
-         last_name =last_name , company_name =company_name ,address = address , state = state , posta = posta , email = email , phone = phone , order_notes = order_notes , cart = cart)
+        if request.POST['c_order_notes'] is not None:
+            order_notes = request.POST['c_order_notes']
+        else :
+            order_notes = ' '
+        new_cart = Cart( subtotal = cart.subtotal , total = cart.total ,coupon = cart.coupon)
+        new_cart.save()
+        for order in cart.orders.all():
+            new_cart.orders.add(order)
 
+        new_cart.save()
+        submittedOrder = SubmittedOrder( country = country , first_name = first_name ,
+         last_name =last_name , company_name =company_name ,address = address , state = state , posta = posta , email = email , phone = phone , order_notes = order_notes , cart = new_cart)  
         submittedOrder.save()
         cart.orders.clear()
         cart.subtotal = 0
         cart.total = 0
         cart.save()
         messages.success(request,'Your Order Submitted Successfully')
-        return redirect('index')
+        return render(request ,'checkout/thankyou.html')
 

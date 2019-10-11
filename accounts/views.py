@@ -39,6 +39,14 @@ def register(request):
         else :
             messages.error(request,'Your Passwords Aren\'t Match')   
             return  redirect(register)
+
+    if request.user.is_authenticated:
+        customer = Customer.objects.get( user = request.user )
+        context = {
+            'cart_size' : len(customer.cart.orders.all())
+        }        
+        return render(request , 'accounts/register.html',context)
+
     return render(request , 'accounts/register.html')
 
 def login(request):
@@ -58,12 +66,15 @@ def login(request):
     return render(request , 'accounts/login.html')
 
 def dashboard(request):
-    if User.is_authenticated:
+    if request.user.is_authenticated:
         customer = Customer.objects.get(user= request.user)
         context = {
             'customer' : customer ,
-        }
+            'cart_size' : len(customer.cart.orders.all()) ,
+        }   
         return render(request , 'accounts/dashboard.html',context)
+
+    return render(request , 'accounts/dashboard.html')
 
 def addToCart(request):
     if request.method == 'POST':

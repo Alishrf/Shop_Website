@@ -4,6 +4,7 @@ from categories.models import Categories
 from itertools import chain
 from django.core.paginator import Paginator 
 from django.shortcuts import get_object_or_404
+from customers.models import Customer
 
 def shop(request):
     if 'refrences' in request.GET:
@@ -32,6 +33,16 @@ def shop(request):
         'values' : request.GET
 
     }
+    if request.user.is_authenticated:
+        customer = Customer.objects.get( user = request.user )
+        context = {
+            'products' : products,
+            'menSize' :len(products_list.filter(categorie = code1)),
+            'womenSize' :len(products_list.filter(categorie = code2)),
+            'childrenSize' :len(products_list.filter(categorie = code3)),
+            'values' : request.GET,
+            'cart_size' : len(customer.cart.orders.all()),
+        }
     return render(request,'shop/shop.html' ,context)
 
 def men(request):
@@ -52,6 +63,15 @@ def men(request):
         'womenSize' :len(products_list.filter(categorie = code3)),
         'childrenSize' :len(products_list.filter(categorie = code4)),
     }
+    if request.user.is_authenticated:
+        customer = Customer.objects.get( user = request.user )
+        context = {
+            'products' : products,
+            'menSize' :len(products_list.filter(categorie = code1)),
+            'womenSize' :len(products_list.filter(categorie = code3)),
+            'childrenSize' :len(products_list.filter(categorie = code4)),
+            'cart_size' : len(customer.cart.orders.all()),
+        }
     return render(request,'shop/shop.html' ,context)
 
 def women(request):
@@ -71,6 +91,15 @@ def women(request):
         'womenSize' :len(products_list.filter(categorie = code1)),
         'childrenSize' :len(products_list.filter(categorie = code4)),
     }
+    if request.user.is_authenticated:
+        customer = Customer.objects.get( user = request.user )
+        context = {
+            'products' : products,
+            'menSize' :len(products_list.filter(categorie = code3)),
+            'womenSize' :len(products_list.filter(categorie = code1)),
+            'childrenSize' :len(products_list.filter(categorie = code4)),
+            'cart_size' : len(customer.cart.orders.all()),
+        }
     return render(request,'shop/shop.html' ,context)
 
 def children(request):
@@ -92,6 +121,15 @@ def children(request):
         'womenSize' :len(products_list.filter(categorie = code3)),
         'childrenSize' :len(products_list.filter(categorie = code1)),
     }
+    if request.user.is_authenticated:
+        customer = Customer.objects.get( user = request.user )
+        context = {
+            'products' : products,
+            'menSize' :len(products_list.filter(categorie = code4)),
+            'womenSize' :len(products_list.filter(categorie = code3)),
+            'childrenSize' :len(products_list.filter(categorie = code1)),   
+            'cart_size' : len(customer.cart.orders.all()),
+        }
     return render(request,'shop/shop.html' ,context)
 
 def product(request,product_id):
@@ -99,4 +137,28 @@ def product(request,product_id):
     context = {
         'product' : product ,
     }
+    if request.user.is_authenticated:
+        customer = Customer.objects.get( user = request.user )
+        context = {
+            'product' : product,
+            'cart_size' : len(customer.cart.orders.all()),
+        }
     return render(request,'shop/product.html' , context )
+
+def search(request):
+    if 'keyword' in request.GET :
+        keyword = request.GET['keyword']
+        products = Product.objects.filter(description__icontains = keyword)
+        paginator = Paginator(products, 6 )
+        page = request.GET.get('page')
+        products = paginator.get_page(page)
+        context ={
+                'products' : products,
+            }
+        if request.user.is_authenticated:
+            customer = Customer.objects.get( user = request.user )
+            context = {
+                'products' : products,
+                'cart_size' : len(customer.cart.orders.all()),
+            }    
+        return render(request , 'shop/shop.html', context)

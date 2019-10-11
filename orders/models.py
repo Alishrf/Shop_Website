@@ -7,3 +7,5 @@ class Order(models.Model):
     quantity = models.IntegerField()
     total_price = models.FloatField(default = 0 )
 
+    def __str__(self):
+        return str(self.product) + '(' + str(self.id) + ')'
